@@ -1,0 +1,221 @@
+{
+  "info": {
+    "name": "Church Management System API",
+    "description": "Complete API collection for testing the CMS backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "memberId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        },
+        "description": "Check if the API is running"
+      }
+    },
+    {
+      "name": "Members",
+      "item": [
+        {
+          "name": "Create Member - Full Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('memberId', jsonData.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"John\",\n  \"second_name\": \"Michael\",\n  \"last_name\": \"Doe\",\n  \"date_of_birth\": \"1990-05-15\",\n  \"gender\": \"male\",\n  \"phone_number\": \"+1234567890\",\n  \"email\": \"john.doe@example.com\",\n  \"address\": \"123 Main Street, City, State 12345\",\n  \"membership_status\": \"active\",\n  \"date_joined\": \"2024-01-15\",\n  \"notes\": \"Joined through community outreach program\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/members",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "members"]
+            },
+            "description": "Create a new member with complete information"
+          }
+        },
+        {
+          "name": "Create Member - Minimal (Visitor)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Jane\",\n  \"last_name\": \"Smith\",\n  \"date_of_birth\": \"1985-08-20\",\n  \"gender\": \"female\",\n  \"date_joined\": \"2024-01-20\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/members",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "members"]
+            },
+            "description": "Create a visitor with minimal required information"
+          }
+        },
+        {
+          "name": "List All Members",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/members?page=1&page_size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "members"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get paginated list of all members"
+          }
+        },
+        {
+          "name": "Filter Members by Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/members?membership_status=active&page=1&page_size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "members"],
+              "query": [
+                {
+                  "key": "membership_status",
+                  "value": "active"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Filter members by membership status"
+          }
+        },
+        {
+          "name": "Search Members",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/members?search=john&page=1&page_size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "members"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "john"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Search members by name, email, or phone"
+          }
+        },
+        {
+          "name": "Get Member by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/members/{{memberId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "members", "{{memberId}}"]
+            },
+            "description": "Get a specific member by UUID"
+          }
+        },
+        {
+          "name": "Update Member",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_number\": \"+1987654321\",\n  \"membership_status\": \"active\",\n  \"notes\": \"Updated contact information\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/members/{{memberId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "members", "{{memberId}}"]
+            },
+            "description": "Update member information (partial update supported)"
+          }
+        },
+        {
+          "name": "Delete Member (Soft Delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/members/{{memberId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "members", "{{memberId}}"]
+            },
+            "description": "Soft delete a member (marks as deleted, doesn't remove from database)"
+          }
+        }
+      ]
+    }
+  ]
+}

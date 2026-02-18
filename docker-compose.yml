@@ -1,0 +1,47 @@
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: cms_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: slim
+      POSTGRES_PASSWORD: 1718
+      POSTGRES_DB: cms_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U slim -d cms_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Application
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cms_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://slim:1718@db:5432/cms_db
+      DEBUG: "True"
+      APP_NAME: "Church Management System"
+      API_V1_PREFIX: /api/v1
+      CORS_ORIGINS: '["http://localhost:3000","http://localhost:8000"]'
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Mount code for development (hot reload)
+      - ./app:/app/app
+      - ./alembic:/app/alembic
+    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+volumes:
+  postgres_data:
+    driver: local

@@ -1,0 +1,53 @@
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: cms_postgres_prod
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cms_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_this_password}
+      POSTGRES_DB: ${POSTGRES_DB:-cms_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cms_network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-cms_user} -d ${POSTGRES_DB:-cms_db}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Application
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cms_api_prod
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-cms_user}:${POSTGRES_PASSWORD:-change_this_password}@db:5432/${POSTGRES_DB:-cms_db}
+      DEBUG: "False"
+      APP_NAME: "Church Management System"
+      API_V1_PREFIX: /api/v1
+      CORS_ORIGINS: ${CORS_ORIGINS:-'["https://yourdomain.com"]'}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - cms_network
+    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4"
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  cms_network:
+    driver: bridge
