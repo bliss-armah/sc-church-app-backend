@@ -1,8 +1,10 @@
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import Field, EmailStr, field_validator
 from typing import Optional, List
 from datetime import date, datetime
 from uuid import UUID
 import enum
+
+from app.schemas.base import CamelModel
 
 
 class GenderEnum(str, enum.Enum):
@@ -17,7 +19,7 @@ class MembershipStatusEnum(str, enum.Enum):
     VISITOR = "visitor"
 
 
-class MemberBase(BaseModel):
+class MemberBase(CamelModel):
     first_name: str = Field(..., min_length=1, max_length=100, description="Member's first name")
     second_name: Optional[str] = Field(None, max_length=100, description="Member's middle name")
     other_names: Optional[str] = Field(None, max_length=255, description="Additional names")
@@ -63,7 +65,7 @@ class MemberCreate(MemberBase):
     pass
 
 
-class MemberUpdate(BaseModel):
+class MemberUpdate(CamelModel):
     """Schema for updating a member - all fields optional"""
     first_name: Optional[str] = Field(None, min_length=1, max_length=100)
     second_name: Optional[str] = Field(None, max_length=100)
@@ -102,12 +104,9 @@ class MemberResponse(MemberBase):
     is_deleted: bool
     created_at: datetime
     updated_at: datetime
-    
-    class Config:
-        from_attributes = True
 
 
-class MemberListResponse(BaseModel):
+class MemberListResponse(CamelModel):
     """Schema for paginated member list response"""
     items: List[MemberResponse]
     total: int

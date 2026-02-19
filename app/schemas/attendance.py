@@ -1,8 +1,10 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
 from typing import Optional, List
 from datetime import date, datetime
 from uuid import UUID
 import enum
+
+from app.schemas.base import CamelModel
 
 
 class AttendanceStatusEnum(str, enum.Enum):
@@ -12,7 +14,7 @@ class AttendanceStatusEnum(str, enum.Enum):
     EXCUSED = "excused"
 
 
-class AttendanceCreate(BaseModel):
+class AttendanceCreate(CamelModel):
     """Schema for marking a single member's attendance"""
     member_id: UUID = Field(..., description="UUID of the member")
     status: AttendanceStatusEnum = Field(
@@ -26,7 +28,7 @@ class AttendanceCreate(BaseModel):
     notes: Optional[str] = Field(None, max_length=500, description="Optional notes")
 
 
-class AttendanceBulkCreate(BaseModel):
+class AttendanceBulkCreate(CamelModel):
     """Schema for marking attendance for multiple members at once"""
     member_ids: List[UUID] = Field(..., min_length=1, description="List of member UUIDs")
     status: AttendanceStatusEnum = Field(
@@ -40,13 +42,13 @@ class AttendanceBulkCreate(BaseModel):
     notes: Optional[str] = Field(None, max_length=500, description="Optional notes")
 
 
-class AttendanceUpdate(BaseModel):
+class AttendanceUpdate(CamelModel):
     """Schema for updating an attendance record — all fields optional"""
     status: Optional[AttendanceStatusEnum] = None
     notes: Optional[str] = Field(None, max_length=500)
 
 
-class AttendanceResponse(BaseModel):
+class AttendanceResponse(CamelModel):
     """Schema for attendance response, includes denormalized member name"""
     id: UUID
     member_id: UUID
@@ -59,11 +61,8 @@ class AttendanceResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
 
-
-class AttendanceListResponse(BaseModel):
+class AttendanceListResponse(CamelModel):
     """Schema for paginated attendance list response"""
     items: List[AttendanceResponse]
     total: int
@@ -76,12 +75,12 @@ class AttendanceListResponse(BaseModel):
 # QR Code self-service flow schemas
 # ---------------------------------------------------------------------------
 
-class QRLookupRequest(BaseModel):
+class QRLookupRequest(CamelModel):
     """Step 1 — member enters phone number at the QR landing page"""
     phone_number: str = Field(..., description="Member's registered phone number")
 
 
-class QRLookupResponse(BaseModel):
+class QRLookupResponse(CamelModel):
     """Step 1 response — returned to the frontend for member to confirm identity"""
     member_id: UUID
     member_name: str = Field(..., description="Full name for the member to confirm")
@@ -91,7 +90,7 @@ class QRLookupResponse(BaseModel):
     )
 
 
-class QRConfirmRequest(BaseModel):
+class QRConfirmRequest(CamelModel):
     """Step 2 — member confirms their identity and self-marks attendance"""
     member_id: UUID = Field(..., description="UUID returned from Step 1 lookup")
     attendance_date: Optional[date] = Field(
@@ -100,7 +99,7 @@ class QRConfirmRequest(BaseModel):
     )
 
 
-class BulkAttendanceResult(BaseModel):
+class BulkAttendanceResult(CamelModel):
     """Schema for bulk attendance creation result"""
     created: List[AttendanceResponse]
     skipped: List[UUID] = Field(

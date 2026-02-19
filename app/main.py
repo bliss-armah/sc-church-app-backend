@@ -30,8 +30,26 @@ app = FastAPI(
     version=settings.APP_VERSION,
     description="Backend API for Church Management System with Authentication",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
 )
+
+# Tell FastAPI to serialise every response_model using its camelCase aliases.
+# This means every endpoint automatically returns camelCase JSON without any
+# per-endpoint changes.
+from fastapi.routing import APIRoute
+from fastapi import Request
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel as PydanticBaseModel
+
+class _AliasJSONResponse(JSONResponse):
+    """Renders Pydantic models using their aliases (camelCase) globally."""
+    def render(self, content) -> bytes:
+        if isinstance(content, PydanticBaseModel):
+            return content.model_dump_json(by_alias=True).encode("utf-8")
+        return super().render(content)
+
+app.router.default_response_class = _AliasJSONResponse
+
 
 # Configure CORS
 app.add_middleware(

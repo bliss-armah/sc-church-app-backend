@@ -1,8 +1,10 @@
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import Field, EmailStr, field_validator
 from typing import Optional
 from datetime import datetime
 from uuid import UUID
 import enum
+
+from app.schemas.base import CamelModel
 
 
 class UserRole(str, enum.Enum):
@@ -10,7 +12,7 @@ class UserRole(str, enum.Enum):
     USER = "user"
 
 
-class UserBase(BaseModel):
+class UserBase(CamelModel):
     email: EmailStr = Field(..., description="User's email address")
     username: str = Field(..., min_length=3, max_length=100, description="Username for login")
     full_name: str = Field(..., min_length=1, max_length=255, description="User's full name")
@@ -44,7 +46,7 @@ class UserCreate(UserBase):
         return v
 
 
-class UserUpdate(BaseModel):
+class UserUpdate(CamelModel):
     """Schema for updating user (admin only)"""
     email: Optional[EmailStr] = None
     full_name: Optional[str] = Field(None, min_length=1, max_length=255)
@@ -52,7 +54,7 @@ class UserUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 
-class UserChangePassword(BaseModel):
+class UserChangePassword(CamelModel):
     """Schema for user changing their own password"""
     current_password: str = Field(..., description="Current password")
     new_password: str = Field(..., min_length=8, description="New password")
@@ -71,7 +73,7 @@ class UserChangePassword(BaseModel):
         return v
 
 
-class UserResetPassword(BaseModel):
+class UserResetPassword(CamelModel):
     """Schema for admin resetting user password"""
     new_password: str = Field(..., min_length=8, description="New password")
     
@@ -89,7 +91,7 @@ class UserResetPassword(BaseModel):
         return v
 
 
-class UserResponse(BaseModel):
+class UserResponse(CamelModel):
     """Schema for user response (without password)"""
     id: UUID
     email: EmailStr
@@ -102,12 +104,9 @@ class UserResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     last_login: Optional[datetime]
-    
-    class Config:
-        from_attributes = True
 
 
-class UserListResponse(BaseModel):
+class UserListResponse(CamelModel):
     """Schema for paginated user list response"""
     items: list[UserResponse]
     total: int
@@ -116,21 +115,21 @@ class UserListResponse(BaseModel):
     total_pages: int
 
 
-class Token(BaseModel):
+class Token(CamelModel):
     """Schema for JWT token response"""
     access_token: str
     token_type: str = "bearer"
     user: UserResponse
 
 
-class TokenData(BaseModel):
+class TokenData(CamelModel):
     """Schema for token payload data"""
     user_id: Optional[UUID] = None
     username: Optional[str] = None
     role: Optional[UserRole] = None
 
 
-class LoginRequest(BaseModel):
+class LoginRequest(CamelModel):
     """Schema for login request"""
     username: str = Field(..., description="Username or email")
     password: str = Field(..., description="Password")
