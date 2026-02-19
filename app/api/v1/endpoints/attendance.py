@@ -5,7 +5,7 @@ from uuid import UUID
 from datetime import date
 import math
 
-from app.api.deps import get_db, require_user_or_admin
+from app.api.deps import get_db, require_attendance_access
 from app.models.user import User
 from app.models.attendance import AttendanceStatusEnum
 from app.schemas.attendance import (
@@ -87,7 +87,7 @@ def qr_confirm(data: QRConfirmRequest, db: Session = Depends(get_db)):
 def mark_attendance(
     data: AttendanceCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_user_or_admin),
+    current_user: User = Depends(require_attendance_access),
 ):
     """
     Record attendance for one member.
@@ -115,7 +115,7 @@ def mark_attendance(
 def bulk_mark_attendance(
     data: AttendanceBulkCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_user_or_admin),
+    current_user: User = Depends(require_attendance_access),
 ):
     """
     Mark the same attendance status for a list of members (e.g., a Sunday service).
@@ -156,7 +156,7 @@ def list_attendance(
     from_date: Optional[date] = Query(None, description="Start of date range (inclusive)"),
     to_date: Optional[date] = Query(None, description="End of date range (inclusive)"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_user_or_admin),
+    current_user: User = Depends(require_attendance_access),
 ):
     """
     Paginated list of attendance records.
@@ -200,7 +200,7 @@ def list_attendance(
 def get_attendance(
     attendance_id: UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_user_or_admin),
+    current_user: User = Depends(require_attendance_access),
 ):
     """Fetch a specific attendance record by its UUID."""
     return AttendanceService.get_attendance(db, attendance_id)
@@ -219,7 +219,7 @@ def update_attendance(
     attendance_id: UUID,
     data: AttendanceUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_user_or_admin),
+    current_user: User = Depends(require_attendance_access),
 ):
     """
     Patch an existing attendance record. Only provided fields are updated.
@@ -242,7 +242,7 @@ def update_attendance(
 def delete_attendance(
     attendance_id: UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_user_or_admin),
+    current_user: User = Depends(require_attendance_access),
 ):
     """
     Soft-delete an attendance record. The record is marked as deleted

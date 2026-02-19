@@ -190,16 +190,16 @@ class UserService:
         """Soft delete a user (admin only)"""
         user = UserService.get_user(db, user_id)
         
-        # Prevent deleting the last admin
-        if user.role == UserRole.ADMIN:
+        # Prevent deleting the last super_admin
+        if user.role == UserRole.SUPER_ADMIN:
             admin_count = db.query(User).filter(
-                User.role == UserRole.ADMIN,
+                User.role == UserRole.SUPER_ADMIN,
                 User.is_deleted == False
             ).count()
             if admin_count <= 1:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Cannot delete the last admin user"
+                    detail="Cannot delete the last super admin user"
                 )
         
         user.is_deleted = True
@@ -221,7 +221,7 @@ class UserService:
             email="admin@cms.com",
             username="admin",
             full_name="System Administrator",
-            role=UserRole.ADMIN,
+            role=UserRole.SUPER_ADMIN,
             hashed_password=get_password_hash("Admin@123"),
             must_change_password=True,
             is_active=True

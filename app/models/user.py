@@ -7,8 +7,9 @@ from app.database import Base
 
 
 class UserRole(str, enum.Enum):
-    ADMIN = "admin"
-    USER = "user"
+    SUPER_ADMIN = "super_admin"
+    CALLING_TEAM = "calling_team"
+    TEXTING_TEAM = "texting_team"
 
 
 class User(Base):
@@ -24,7 +25,12 @@ class User(Base):
     
     # User information
     full_name = Column(String(255), nullable=False)
-    role = Column(SQLEnum(UserRole), nullable=False, default=UserRole.USER, index=True)
+    role = Column(
+        SQLEnum(UserRole, values_callable=lambda x: [e.value for e in x]),
+        nullable=False,
+        default=UserRole.CALLING_TEAM,
+        index=True
+    )
     
     # Account status
     is_active = Column(Boolean, default=True, nullable=False, index=True)
@@ -40,3 +46,4 @@ class User(Base):
     
     def __repr__(self):
         return f"<User {self.username} ({self.role})>"
+

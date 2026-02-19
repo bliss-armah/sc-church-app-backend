@@ -8,15 +8,16 @@ from app.schemas.base import CamelModel
 
 
 class UserRole(str, enum.Enum):
-    ADMIN = "admin"
-    USER = "user"
+    SUPER_ADMIN = "super_admin"
+    CALLING_TEAM = "calling_team"
+    TEXTING_TEAM = "texting_team"
 
 
 class UserBase(CamelModel):
     email: EmailStr = Field(..., description="User's email address")
     username: str = Field(..., min_length=3, max_length=100, description="Username for login")
     full_name: str = Field(..., min_length=1, max_length=255, description="User's full name")
-    role: UserRole = Field(default=UserRole.USER, description="User role (admin or user)")
+    role: UserRole = Field(default=UserRole.CALLING_TEAM, description="User role")
     
     @field_validator('username')
     @classmethod

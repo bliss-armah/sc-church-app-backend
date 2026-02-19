@@ -4,7 +4,7 @@ from typing import Optional
 from uuid import UUID
 import math
 
-from app.api.deps import get_db, require_user_or_admin
+from app.api.deps import get_db, require_member_access
 from app.schemas.member import (
     MemberCreate,
     MemberUpdate,
@@ -28,7 +28,7 @@ router = APIRouter()
 def create_member(
     member_data: MemberCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_user_or_admin)
+    current_user: User = Depends(require_member_access)
 ):
     """
     Create a new church member with the following information:
@@ -73,7 +73,7 @@ def list_members(
         description="Search by name, email, or phone"
     ),
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_user_or_admin)
+    current_user: User = Depends(require_member_access)
 ):
     """
     Get a paginated list of church members.
@@ -113,7 +113,7 @@ def list_members(
 def get_member(
     member_id: UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_user_or_admin)
+    current_user: User = Depends(require_member_access)
 ):
     """
     Get a specific member by their UUID.
@@ -132,7 +132,7 @@ def update_member(
     member_id: UUID,
     member_data: MemberUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_user_or_admin)
+    current_user: User = Depends(require_member_access)
 ):
     """
     Update a member's information. Only provided fields will be updated.
@@ -150,7 +150,7 @@ def update_member(
 def delete_member(
     member_id: UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_user_or_admin)
+    current_user: User = Depends(require_member_access)
 ):
     """
     Soft delete a member. The member will be marked as deleted but not removed from the database.

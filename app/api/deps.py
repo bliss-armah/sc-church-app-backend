@@ -74,20 +74,35 @@ async def require_admin(
     current_user: User = Depends(get_current_active_user)
 ) -> User:
     """
-    Require that the current user has admin role.
+    Require that the current user has super_admin role.
     """
-    if current_user.role != UserRole.ADMIN:
+    if current_user.role != UserRole.SUPER_ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin privileges required"
+            detail="Super admin privileges required"
         )
     return current_user
 
 
-async def require_user_or_admin(
+async def require_member_access(
     current_user: User = Depends(get_current_active_user)
 ) -> User:
     """
-    Require that the current user has user or admin role (basically any authenticated user).
+    Require super_admin, calling_team, or texting_team role.
+    All authenticated roles can access member data.
     """
+    return current_user
+
+
+async def require_attendance_access(
+    current_user: User = Depends(get_current_active_user)
+) -> User:
+    """
+    Require super_admin or calling_team to access attendance data.
+    """
+    if current_user.role == UserRole.TEXTING_TEAM:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Attendance access requires calling_team or super_admin role"
+        )
     return current_user
