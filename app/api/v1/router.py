@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import members, auth, users
+from app.api.v1.endpoints import members, auth, users, attendance
 
 api_router = APIRouter()
 
@@ -24,7 +24,14 @@ api_router.include_router(
     tags=["members"]
 )
 
+# Attendance endpoints (authenticated users)
+api_router.include_router(
+    attendance.router,
+    prefix="/attendance",
+    tags=["attendance"]
+)
+
 # Future routers can be added here:
-# api_router.include_router(attendance.router, prefix="/attendance", tags=["attendance"])
 # api_router.include_router(donations.router, prefix="/donations", tags=["donations"])
 # api_router.include_router(groups.router, prefix="/groups", tags=["groups"])
+
